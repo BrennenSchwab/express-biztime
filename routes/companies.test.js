@@ -11,7 +11,7 @@ beforeEach(async function () {
         `INSERT INTO 
         companies (code, name, description)
         VALUES ('apple', 'Apple', 'Maker of OSX.'),
-        ('ibm', 'IBM', 'Big blue.') RETURNING code, name, description`);
+        ('ibm', 'IBM', 'Big blue.') RETURNING code, name`);// removed description part due to issues
     testCompany = companyResults.rows;
 
     let invoicesResults = await db.query(
@@ -28,6 +28,7 @@ beforeEach(async function () {
 afterEach(async function () {
     await db.query("DELETE FROM invoices");
     await db.query("DELETE FROM companies");
+    await db.query("SELECT setval('invoices_id_seq', 1, false)");
     })
 
 afterAll(async function () {
@@ -44,7 +45,7 @@ describe("GET /", function () {
             });
     });
 
-describe("GET /companies/:code", function () {
+describe("GET /:code", function () {
 
         test("Should return info on 'code' (requested) company.", async function () {
                 const response = await request(app).get(`/companies/${testCompany[0].code}`);
@@ -54,7 +55,7 @@ describe("GET /companies/:code", function () {
                         "company": {
                             code: testCompany[0].code,
                             name: testCompany[0].name,
-                            description: testCompany[0].description,
+                            description: 'Maker of OSX.',
                             "invoices": [testInvoice[0].id, testInvoice[1].id, testInvoice[2].id]
                         }
                     }
@@ -97,7 +98,7 @@ describe("POST /", function () {
     });
 
 
-describe("PUT /", function () {
+describe("PUT /:code", function () {
 
         test("It should update a specified company", async function () {
             const response = await request(app)
@@ -125,7 +126,7 @@ describe("PUT /", function () {
 
         test("It should return 500 for missing data", async function () {
                 const response = await request(app)
-                    .put(`/companies/${testCompany[0]}`)
+                    .put(`/companies/${testCompany[0].code}`)
                     .send({});
 
                 expect(response.status).toEqual(500);
@@ -133,11 +134,11 @@ describe("PUT /", function () {
     });
 
 
-describe("DELETE /", function () {
+describe("DELETE /:code", function () {
 
         test("It should delete company", async function () {
             const response = await request(app)
-                .delete(`/companies/${testCompany[0]}`);
+                .delete(`/companies/${testCompany[0].code}`);
 
             expect(response.body).toEqual({ "status": "deleted" });
         });

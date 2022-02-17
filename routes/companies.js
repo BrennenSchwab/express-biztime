@@ -10,8 +10,8 @@ router.get("/", async function (req, res, next) {
     const result = await db.query(`SELECT code, name FROM companies ORDER BY name`);
 
     return res.json({"companies": result.rows});
-  } catch (e) {
-    return next(e);
+  } catch (err) {
+    return next(err);
   }
 });
 
@@ -34,8 +34,8 @@ router.get("/:code", async function (req, res, next) {
     company.invoices = invoices.map(i => i.id);
 
     return res.json({"company": company});
-  } catch (e) {
-    return next(e);
+  } catch (err) {
+    return next(err);
   }
 });
 
@@ -53,8 +53,8 @@ router.post("/", async function (req, res, next) {
         [code, name, description]
         );
     return res.status(201).json({"company": result.rows[0]});
-  } catch (e) {
-    return next(e);
+  } catch (err) {
+    return next(err);
   }
 });
 
@@ -76,8 +76,8 @@ router.put("/:code", async function (req, res, next) {
     } else {
       return res.json({"company": result.rows[0]});
     }
-  } catch (e) {
-    return next(e);
+  } catch (err) {
+    return next(err);
   }
 
 });
@@ -93,8 +93,8 @@ router.delete("/:code", async function (req, res, next) {
     } else {
       return res.json({"status": "deleted"});
     }
-  } catch (e) {
-    return next(e);
+  } catch (err) {
+    return next(err);
   }
 });
 
