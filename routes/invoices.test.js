@@ -149,7 +149,7 @@ describe("DELETE /", function() {
                 const response = await request(app)
                     .delete(`/invoices/${testInvoice[0]}`);
 
-                expect(response.body).toEqual({ message: "deleted" });
+                expect(response.body).toEqual({ "status": "deleted" });
             });
 
         test("It should return 404 for no-such-invoices", async function() {

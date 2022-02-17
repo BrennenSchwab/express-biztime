@@ -7,27 +7,27 @@ let testCompany;
 let testInvoice;
 
 beforeEach(async function () {
-        const companyResults = await db.query(
-            `INSERT INTO companies (code, name, description)
+    let companyResults = await db.query(
+        `INSERT INTO 
+        companies (code, name, description)
         VALUES ('apple', 'Apple', 'Maker of OSX.'),
-            ('ibm', 'IBM', 'Big blue.')`);
+        ('ibm', 'IBM', 'Big blue.') RETURNING code, name, description`);
+    testCompany = companyResults.rows;
 
-        testCompany = companyResults.rows;
-
-        /* const invoicesResults = await db.query(
-            `INSERT INTO invoices (comp_code, amt, paid, add_date, paid_date)
-            VALUES ('apple', 100, false, '2022-02-17', null),
-                ('apple', 200, false, '2022-02-17', null),
-                ('apple', 300, true, '2022-02-17', '2018-01-01'),
-                ('ibm', 400, false, '2022-02-17', null)
-                RETURNING id`);
-        
-        testInvoice = invoicesResults.rows; **/
-    }); 
+    let invoicesResults = await db.query(
+        `INSERT INTO invoices (comp_code, amt, paid, add_date, paid_date)
+        VALUES ('apple', 100, false, '2022-02-17', null),
+            ('apple', 200, false, '2022-02-17', null),
+            ('apple', 300, true, '2022-02-17', '2018-01-01'),
+            ('ibm', 400, false, '2022-02-17', null)
+            RETURNING id`);
+    
+    testInvoice = invoicesResults.rows;
+    })
 
 afterEach(async function () {
-        /* await db.query("DELETE FROM invoices"); **/
-        await db.query("DELETE FROM companies");
+    await db.query("DELETE FROM invoices");
+    await db.query("DELETE FROM companies");
     })
 
 afterAll(async function () {
@@ -35,13 +35,13 @@ afterAll(async function () {
     })
 
 describe("GET /", function () {
-        test("It should respond with an array of companies in the db", async () => {
-            const response = await request(app).get("/companies");
-            expect(response.statusCode).toEqual(200);
-            expect(response.body).toEqual({
-                "companies": [testCompany]
+        test("It should respond with an array of companies in the db", async function () {
+                const response = await request(app).get("/companies");
+                expect(response.statusCode).toEqual(200);
+                expect(response.body).toEqual({
+                    "companies": testCompany
+                });
             });
-        });
     });
 
 describe("GET /companies/:code", function () {
@@ -53,9 +53,9 @@ describe("GET /companies/:code", function () {
                     {
                         "company": {
                             code: testCompany[0].code,
-                            name: testCompany[0].code.name,
+                            name: testCompany[0].name,
                             description: testCompany[0].description,
-                            "invoices": [testInvoice[0], testInvoice[1], testInvoice[2]]
+                            "invoices": [testInvoice[0].id, testInvoice[1].id, testInvoice[2].id]
                         }
                     }
                 );
@@ -115,7 +115,7 @@ describe("PUT /", function () {
             );
         });
 
-        test("It should return 404 for no-such-comp", async function () {
+        test("It should return 404 for no company found", async function () {
                 const response = await request(app)
                     .put("/companies/what")
                     .send({ name: "What" });
@@ -139,7 +139,7 @@ describe("DELETE /", function () {
             const response = await request(app)
                 .delete(`/companies/${testCompany[0]}`);
 
-            expect(response.body).toEqual({ message: "deleted" });
+            expect(response.body).toEqual({ "status": "deleted" });
         });
 
         test("It should return 404 for a not-found company", async function () {
@@ -148,4 +148,4 @@ describe("DELETE /", function () {
 
                 expect(response.status).toEqual(404);
             });
-    }); 
+    });
