@@ -6,36 +6,36 @@ const db = require("../db");
 let testCompany;
 let testInvoice;
 
-beforeEach(async () => {
-    const companyResults = await db.query(
-        `INSERT INTO companies (code, name, description)
+beforeEach(async function () {
+        const companyResults = await db.query(
+            `INSERT INTO companies (code, name, description)
         VALUES ('apple', 'Apple Computer', 'Maker of OSX.'),
             ('ibm', 'IBM', 'Big blue.')`);
 
-    testCompany = companyResults.rows;
-    
-    const invoicesResults = await db.query(
-        `INSERT INTO invoices (comp_code, amt, paid, add_date, paid_date)
+        testCompany = companyResults.rows;
+
+        const invoicesResults = await db.query(
+            `INSERT INTO invoices (comp_code, amt, paid, add_date, paid_date)
         VALUES ('apple', 100, false, '2022-02-17', null),
             ('apple', 200, false, '2022-02-17', null),
             ('apple', 300, true, '2022-02-17', '2018-01-01'), 
             ('ibm', 400, false, '2022-02-17', null)
             RETURNING id`);
-    
-    testInvoice = invoicesResults.rows;
-}); 
 
-afterEach(async () => {
+        testInvoice = invoicesResults.rows;
+    }); 
+
+afterEach(async function() {
     await db.query("DELETE FROM invoices");
     await db.query("DELETE FROM companies");
 })
 
-afterAll(async () => {
+afterAll(async function() {
   await db.end()
 })
 
-describe("GET /", () => {
-        test("It should respond with array of invoices", async () => {
+describe("GET /", function() {
+        test("It should respond with array of invoices", async function() {
                 const response = await request(app).get("/invoices");
                 expect(response.statusCode).toEqual(200);
                 expect(response.body).toEqual({
@@ -51,9 +51,9 @@ describe("GET /", () => {
     });
 
 
-describe("GET /:id", () => {
+describe("GET /:id", function() {
 
-        test("Should return specific invoice info", async () => {
+        test("Should return specific invoice info", async function() {
             const response = await request(app).get(`/invoices/${testInvoice[0]}`);
             expect(response.statusCode).toEqual(200);
             expect(response.body).toEqual(
@@ -74,16 +74,16 @@ describe("GET /:id", () => {
             );
         });
 
-        test("It should return 404 for no-such-invoice", async () => {
+        test("It should return 404 for no-such-invoice", async function() {
                 const response = await request(app).get("/invoices/999");
                 expect(response.status).toEqual(404);
             });
     });
 
 
-describe("POST /", () => {
+describe("POST /", function() {
 
-        test("It should add invoice", async () => {
+        test("It should add invoice", async function() {
                 const response = await request(app)
                     .post("/invoices")
                     .send({ amt: 400, comp_code: 'ibm' });
@@ -104,9 +104,9 @@ describe("POST /", () => {
     });
 
 
-describe("PUT /", () => {
+describe("PUT /", function() {
 
-        test("It should update an invoice", async () => {
+        test("It should update an invoice", async function() {
                 const response = await request(app)
                     .put("/invoices/1")
                     .send({ amt: 1000, paid: false });
@@ -125,7 +125,7 @@ describe("PUT /", () => {
                 );
             });
 
-        test("It should return 404 for no-such-invoice", async () => {
+        test("It should return 404 for no-such-invoice", async function() {
                 const response = await request(app)
                     .put("/invoices/9999")
                     .send({ amt: 1000 });
@@ -133,7 +133,7 @@ describe("PUT /", () => {
                 expect(response.status).toEqual(404);
             });
 
-        test("It should return 500 for missing data", async () => {
+        test("It should return 500 for missing data", async function() {
                 const response = await request(app)
                     .put(`/invoices/${testInvoice[0]}`)
                     .send({});
@@ -143,16 +143,16 @@ describe("PUT /", () => {
     });
 
 
-describe("DELETE /", () => {
+describe("DELETE /", function() {
 
-        test("It should delete invoice", async () => {
+        test("It should delete invoice", async function() {
                 const response = await request(app)
                     .delete(`/invoices/${testInvoice[0]}`);
 
                 expect(response.body).toEqual({ message: "deleted" });
             });
 
-        test("It should return 404 for no-such-invoices", async () => {
+        test("It should return 404 for no-such-invoices", async function() {
                 const response = await request(app)
                     .delete("/invoices/999");
 

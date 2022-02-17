@@ -6,47 +6,47 @@ const db = require("../db");
 let testCompany;
 let testInvoice;
 
-beforeEach(async () => {
-    const companyResults = await db.query(
-        `INSERT INTO companies (code, name, description)
+beforeEach(async function () {
+        const companyResults = await db.query(
+            `INSERT INTO companies (code, name, description)
         VALUES ('apple', 'Apple', 'Maker of OSX.'),
             ('ibm', 'IBM', 'Big blue.')`);
 
-    testCompany = companyResults.rows;
-    
-    /* const invoicesResults = await db.query(
-        `INSERT INTO invoices (comp_code, amt, paid, add_date, paid_date)
-        VALUES ('apple', 100, false, '2022-02-17', null),
-            ('apple', 200, false, '2022-02-17', null),
-            ('apple', 300, true, '2022-02-17', '2018-01-01'), 
-            ('ibm', 400, false, '2022-02-17', null)
-            RETURNING id`);
-    
-    testInvoice = invoicesResults.rows; **/
-}); 
+        testCompany = companyResults.rows;
 
-afterEach(async () => {
-    /* await db.query("DELETE FROM invoices"); **/ 
-    await db.query("DELETE FROM companies");
-})
+        /* const invoicesResults = await db.query(
+            `INSERT INTO invoices (comp_code, amt, paid, add_date, paid_date)
+            VALUES ('apple', 100, false, '2022-02-17', null),
+                ('apple', 200, false, '2022-02-17', null),
+                ('apple', 300, true, '2022-02-17', '2018-01-01'),
+                ('ibm', 400, false, '2022-02-17', null)
+                RETURNING id`);
+        
+        testInvoice = invoicesResults.rows; **/
+    }); 
 
-afterAll(async () => {
-  await db.end()
-})
+afterEach(async function () {
+        /* await db.query("DELETE FROM invoices"); **/
+        await db.query("DELETE FROM companies");
+    })
 
-describe("GET /", () => {
+afterAll(async function () {
+        await db.end();
+    })
+
+describe("GET /", function () {
         test("It should respond with an array of companies in the db", async () => {
-                const response = await request(app).get("/companies");
-                expect(response.statusCode).toEqual(200);
-                expect(response.body).toEqual({
-                    "companies": [testCompany]
-                });
+            const response = await request(app).get("/companies");
+            expect(response.statusCode).toEqual(200);
+            expect(response.body).toEqual({
+                "companies": [testCompany]
             });
+        });
     });
 
-/* describe("GET /companies/:code", () => {
+describe("GET /companies/:code", function () {
 
-        test("Should return info on 'code' (requested) company.", async () => {
+        test("Should return info on 'code' (requested) company.", async function () {
                 const response = await request(app).get(`/companies/${testCompany[0].code}`);
                 expect(response.statusCode).toEqual(200);
                 expect(response.body).toEqual(
@@ -61,20 +61,20 @@ describe("GET /", () => {
                 );
             });
 
-        test("It should return 404 for error on no company found", async () => {
+        test("It should return 404 for error on no company found", async function () {
                 const response = await request(app).get("/companies/non-company-pdpd");
                 expect(response.status).toEqual(404);
             });
     });
 
 
-describe("POST /", () => {
+describe("POST /", function () {
 
-        test("Result should add a new company", async () => {
+        test("Result should add a new company", async function () {
                 const response = await request(app)
                     .post("/companies")
                     .send({ name: "Springboard", description: "Coding" });
-                
+
                 expect(response.statusCode).toEqual(201);
                 expect(response.body).toEqual(
                     {
@@ -87,7 +87,7 @@ describe("POST /", () => {
                 );
             });
 
-        test("It should return an error status code 500 for duplicates", async () => {
+        test("It should return an error status code 500 for duplicates", async function () {
                 const response = await request(app)
                     .post("/companies")
                     .send({ name: "Apple", description: "cjndvns" });
@@ -97,9 +97,9 @@ describe("POST /", () => {
     });
 
 
-describe("PUT /", () => {
+describe("PUT /", function () {
 
-        test("It should update a specified company", async () => {
+        test("It should update a specified company", async function () {
             const response = await request(app)
                 .put(`/companies/${testCompany[0].code}`)
                 .send({ name: "Apple", description: "This is a description" });
@@ -115,7 +115,7 @@ describe("PUT /", () => {
             );
         });
 
-        test("It should return 404 for no-such-comp", async () => {
+        test("It should return 404 for no-such-comp", async function () {
                 const response = await request(app)
                     .put("/companies/what")
                     .send({ name: "What" });
@@ -123,7 +123,7 @@ describe("PUT /", () => {
                 expect(response.status).toEqual(404);
             });
 
-        test("It should return 500 for missing data", async () => {
+        test("It should return 500 for missing data", async function () {
                 const response = await request(app)
                     .put(`/companies/${testCompany[0]}`)
                     .send({});
@@ -133,19 +133,19 @@ describe("PUT /", () => {
     });
 
 
-describe("DELETE /", () => {
+describe("DELETE /", function () {
 
-        test("It should delete company", async () => {
-                const response = await request(app)
-                    .delete(`/companies/${testCompany[0]}`);
+        test("It should delete company", async function () {
+            const response = await request(app)
+                .delete(`/companies/${testCompany[0]}`);
 
-                expect(response.body).toEqual({ message: "deleted" });
-            });
+            expect(response.body).toEqual({ message: "deleted" });
+        });
 
-        test("It should return 404 for a not-found company", async () => {
+        test("It should return 404 for a not-found company", async function () {
                 const response = await request(app)
                     .delete("/companies/whomssss");
 
                 expect(response.status).toEqual(404);
             });
-    }); **/
+    }); 
